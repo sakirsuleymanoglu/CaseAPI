@@ -1,6 +1,5 @@
 ﻿using CaseAPI.Abstractions.Accounts;
 using CaseAPI.Abstractions.Authentication;
-using CaseAPI.Models.Accounts;
 using CaseAPI.Models.Accounts.Transactions;
 using CaseAPI.Models.Authentication;
 using CaseAPI.Models.Jwt;
@@ -13,8 +12,8 @@ namespace CaseAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public sealed class AuthenticationController(IAuthenticationService authenticationService,
-    IAccountService accountService,
+public sealed class AuthenticationController(
+    IAuthenticationService authenticationService,
     IAccountTransactionService accountTransactionService) : ControllerBase
 {
     [HttpPost("login")]
@@ -34,13 +33,6 @@ public sealed class AuthenticationController(IAuthenticationService authenticati
             UserName = User.Identity?.Name,
             UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
         });
-    }
-
-    [HttpPost("create-account")]
-    public async Task<IActionResult> CreateAccount(CreateAccount model)
-    {
-        var result = await accountService.CreateAsync(model.AppUserId);
-        return Ok(result.Code);
     }
 
     [HttpPost("create-deposit")]

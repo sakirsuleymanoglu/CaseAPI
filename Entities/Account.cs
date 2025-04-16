@@ -15,5 +15,7 @@ public sealed class Account
     public AppUser? AppUser { get; set; }
     public decimal Balance { get; set; }
 
+    public string? Title { get; set; }
+
     public byte[] RowVersion { get; set; } = [];
 }

@@ -1,13 +1,14 @@
 ﻿using CaseAPI.Abstractions.Accounts;
 using CaseAPI.Data;
 using CaseAPI.Entities;
+using CaseAPI.Models.Accounts;
 using Microsoft.EntityFrameworkCore;
 
 namespace CaseAPI.Services.Accounts;
 
 public sealed class AccountService(ApplicationDbContext context) : IAccountService
 {
-    public async Task<Account> CreateAsync(string appUserId)
+    public async Task<Account> CreateAsync(CreateAccount model)
     {
         string code = await CreateCodeAsync();
 
@@ -20,7 +21,8 @@ public sealed class AccountService(ApplicationDbContext context) : IAccountServi
         {
             Id = Guid.NewGuid(),
             Code = code,
-            AppUserId = Guid.Parse(appUserId),
+            AppUserId = Guid.Parse(model.AppUserId),
+            Title = model.Title,
             Balance = 0,
         };
 
