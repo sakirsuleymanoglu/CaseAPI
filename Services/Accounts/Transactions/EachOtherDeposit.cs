@@ -1,4 +1,4 @@
-﻿using CaseAPI.Abstractions.Accounts;
+﻿using CaseAPI.Abstractions.Accounts.Transactions;
 using CaseAPI.Data;
 using CaseAPI.Entities;
 using CaseAPI.Entities.Enums;
@@ -7,39 +7,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CaseAPI.Services.Accounts.Transactions;
 
-public sealed class EachOtherDeposit : TransactionBase, ITransaction
+public sealed class EachOtherDeposit(CreateEachOtherDeposit model, ApplicationDbContext context) : TransactionBase(TransactionChannel.ATM.ToString()), ITransaction
 {
-
-    readonly ApplicationDbContext _context;
-    readonly CreateEachOtherDeposit _model;
-    public EachOtherDeposit(CreateEachOtherDeposit model, ApplicationDbContext context) : base(TransactionChannel.ATM.ToString())
-    {
-        _model = model;
-        _context = context;
-    }
-
     public TransactionType Type { get; } = TransactionType.Deposit;
 
     public async Task OperationAsync()
     {
-        Account? fromAccount = await _context.Accounts.SingleOrDefaultAsync(x => x.Code == _model.FromAccountCode);
+        Account? fromAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Code == model.FromAccountCode);
 
         if (fromAccount == null)
             throw new Exception();
 
-        Account? toAccount = await _context.Accounts.SingleOrDefaultAsync(x => x.Code == _model.ToAccountCode);
+        Account? toAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Code == model.ToAccountCode);
 
         if (toAccount == null)
             throw new Exception();
 
-        if (fromAccount.Balance < _model.Amount)
+        if (fromAccount.Balance < model.Amount)
             throw new Exception("Insufficient balance");
 
         decimal toAccountBalance = toAccount.Balance;
         decimal fromAccountBalance = fromAccount.Balance;
 
-        toAccount.Balance += _model.Amount;
-        fromAccount.Balance -= _model.Amount;
+        toAccount.Balance += model.Amount;
+        fromAccount.Balance -= model.Amount;
 
         DateTime createdDate = DateTime.Now;
 
@@ -47,7 +38,7 @@ public sealed class EachOtherDeposit : TransactionBase, ITransaction
         {
             Id = Guid.NewGuid(),
             Account = fromAccount,
-            Amount = _model.Amount,
+            Amount = model.Amount,
             Channel = Channel,
             Type = Type,
             Description = Type.ToString(),
@@ -61,7 +52,7 @@ public sealed class EachOtherDeposit : TransactionBase, ITransaction
         {
             Id = Guid.NewGuid(),
             Account = toAccount,
-            Amount = _model.Amount,
+            Amount = model.Amount,
             Channel = Channel,
             Type = Type,
             Balance = toAccountBalance,
@@ -70,9 +61,9 @@ public sealed class EachOtherDeposit : TransactionBase, ITransaction
             UpdatedBalance = toAccount.Balance
         };
 
-        await _context.AccountTransactions.AddAsync(fromAccountTransaction);
-        await _context.AccountTransactions.AddAsync(toAccountTransaction);
+        await context.AccountTransactions.AddAsync(fromAccountTransaction);
+        await context.AccountTransactions.AddAsync(toAccountTransaction);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 }

@@ -10,4 +10,6 @@ public interface IAccountTransactionService
     Task CreateDepositAsync(
        CreateDeposit model
         );
+
+    Task CreateWithdrawalAsync(CreateWithdrawal model);
 }

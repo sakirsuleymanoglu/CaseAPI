@@ -56,4 +56,11 @@ public sealed class AuthenticationController(IAuthenticationService authenticati
         await accountTransactionService.CreateEachOtherDepositAsync(model);
         return Ok();
     }
+
+    [HttpPost("create-withdrawal")]
+    public async Task<IActionResult> CreateWithdrawal(CreateWithdrawal model)
+    {
+        await accountTransactionService.CreateWithdrawalAsync(model);
+        return Ok();
+    }
 }

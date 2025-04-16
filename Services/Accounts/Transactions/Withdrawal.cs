@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CaseAPI.Services.Accounts.Transactions;
 
-public sealed class Deposit(CreateDeposit model, ApplicationDbContext context) : TransactionBase(TransactionChannel.ATM.ToString()), ITransaction
+public sealed class Withdrawal(CreateWithdrawal model, ApplicationDbContext context) : TransactionBase(TransactionChannel.ATM.ToString()), ITransaction
 {
-    public TransactionType Type { get; } = TransactionType.Deposit;
+    public TransactionType Type { get; } = TransactionType.Withdrawal;
 
     public async Task OperationAsync()
     {
@@ -20,7 +20,10 @@ public sealed class Deposit(CreateDeposit model, ApplicationDbContext context) :
 
         decimal balance = account.Balance;
 
-        account.Balance += model.Amount;
+        if (model.Amount > account.Balance)
+            throw new Exception("Insufficient funds");
+
+        account.Balance -= model.Amount;
 
         AccountTransaction transaction = new()
         {

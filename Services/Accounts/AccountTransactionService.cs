@@ -14,4 +14,7 @@ public sealed class AccountTransactionService(ApplicationDbContext context) : IA
     public async Task CreateDepositAsync(
        CreateDeposit model
         ) => await new Deposit(model, context).OperationAsync();
+
+    public async Task CreateWithdrawalAsync(CreateWithdrawal model)
+       => await new Withdrawal(model, context).OperationAsync();
 }

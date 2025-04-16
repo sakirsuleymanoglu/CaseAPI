@@ -2,6 +2,7 @@ using CaseAPI.Abstractions.Accounts;
 using CaseAPI.Abstractions.Authentication;
 using CaseAPI.Abstractions.Encryption;
 using CaseAPI.Abstractions.Jwt;
+using CaseAPI.Abstractions.Users;
 using CaseAPI.Data;
 using CaseAPI.Entities;
 using CaseAPI.Middlewares;
@@ -11,6 +12,7 @@ using CaseAPI.Services.Accounts;
 using CaseAPI.Services.Authentication;
 using CaseAPI.Services.Encryption;
 using CaseAPI.Services.Jwt;
+using CaseAPI.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -44,11 +46,13 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddScoped<IAccountTransactionService, AccountTransactionService>();
 
+builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDbContext>(optionsBuilder =>
 {
-    optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Sqlite"));
+    optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"));
 });
 
 builder.Services.AddIdentity<AppUser, AppRole>(identityOptions =>

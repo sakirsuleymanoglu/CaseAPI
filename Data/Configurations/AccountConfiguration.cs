@@ -19,5 +19,7 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasOne(x => x.AppUser)
             .WithMany(x => x.Accounts)
             .HasForeignKey(x => x.AppUserId);
+
+        builder.Property(x => x.RowVersion).IsRowVersion();
     }
 }

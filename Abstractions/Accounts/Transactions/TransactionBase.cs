@@ -1,6 +1,6 @@
 ﻿using CaseAPI.Entities.Enums;
 
-namespace CaseAPI.Abstractions.Accounts;
+namespace CaseAPI.Abstractions.Accounts.Transactions;
 
 public abstract class TransactionBase
 {

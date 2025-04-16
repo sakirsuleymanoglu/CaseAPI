@@ -5,6 +5,7 @@ public sealed class Account
     public Account()
     {
         Transactions = new HashSet<AccountTransaction>();
+
     }
 
     public Guid Id { get; set; }
@@ -13,4 +14,6 @@ public sealed class Account
     public Guid AppUserId { get; set; }
     public AppUser? AppUser { get; set; }
     public decimal Balance { get; set; }
+
+    public byte[] RowVersion { get; set; } = [];
 }
