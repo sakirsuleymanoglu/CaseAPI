@@ -20,7 +20,7 @@ public sealed class AuthenticationService(
     {
         AppUser? user = await userManager.FindByNameAsync(model.UserName) ?? throw LoginException;
 
-        string decryptedPassword = encryptionService.Decrypt(model.Password);
+        string? decryptedPassword = encryptionService.Decrypt(model.Password) ?? throw LoginException;
 
         bool checkPasswordResult = await userManager.CheckPasswordAsync(user, decryptedPassword);
 

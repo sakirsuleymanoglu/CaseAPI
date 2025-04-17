@@ -2,6 +2,6 @@
 
 public interface IEncryptionService
 {
-    string Encrypt(string plainText);
-    string Decrypt(string cipherText);
+    string? Encrypt(string plainText);
+    string? Decrypt(string cipherText);
 }

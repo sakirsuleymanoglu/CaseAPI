@@ -10,42 +10,55 @@ public sealed class EncryptionService(IOptions<EncryptionOptions> options) : IEn
 {
     private readonly byte[] _key = Encoding.UTF8.GetBytes(options.Value.SecretKey);
 
-    public string Encrypt(string plainText)
+    public string? Encrypt(string plainText)
     {
-        byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
-
-        byte[] encryptedBytes;
-
-        using (Aes aes = Aes.Create())
+        try
         {
-            aes.Key = _key;
-            aes.Mode = CipherMode.ECB;
-            aes.Padding = PaddingMode.PKCS7;
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
 
-            using ICryptoTransform encryptor = aes.CreateEncryptor();
-            encryptedBytes = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+            byte[] encryptedBytes;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.PKCS7;
+
+                using ICryptoTransform encryptor = aes.CreateEncryptor();
+                encryptedBytes = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+            }
+
+            return Convert.ToBase64String(encryptedBytes);
         }
-
-        return Convert.ToBase64String(encryptedBytes);
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
-    public string Decrypt(string cipherText)
+    public string? Decrypt(string cipherText)
     {
-        byte[] cipherBytes = Convert.FromBase64String(cipherText);
-
-        byte[] decryptedBytes;
-
-        using (Aes aes = Aes.Create())
+        try
         {
-            aes.Key = _key;
-            aes.Mode = CipherMode.ECB;
-            aes.Padding = PaddingMode.PKCS7;
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
 
-            using ICryptoTransform decryptor = aes.CreateDecryptor();
-            decryptedBytes = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+            byte[] decryptedBytes;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.Mode = CipherMode.ECB;
+                aes.Padding = PaddingMode.PKCS7;
+
+                using ICryptoTransform decryptor = aes.CreateDecryptor();
+                decryptedBytes = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+            }
+
+            return Encoding.UTF8.GetString(decryptedBytes);
         }
-
-        return Encoding.UTF8.GetString(decryptedBytes);
+        catch (Exception)
+        {
+            return null;
+        }
     }
-
 }

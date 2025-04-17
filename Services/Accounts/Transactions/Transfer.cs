@@ -75,11 +75,12 @@ public sealed class Transfer(
 
         await context.SaveChangesAsync();
 
-        await transferHubService.SendNewTransferMessageAsync(toAccount.AppUserId, new()
-        {
-            Amount = model.Amount,
-            SenderAccountCode = model.FromAccountCode,
-            SenderUserName = fromAccount.AppUser?.UserName,
-        });
+        if (toAccount.AppUserId != userId)
+            await transferHubService.SendNewTransferMessageAsync(toAccount.AppUserId, new()
+            {
+                Amount = model.Amount,
+                ToAccountCode = model.ToAccountCode,
+                SenderUserName = fromAccount.AppUser?.UserName,
+            });
     }
 }

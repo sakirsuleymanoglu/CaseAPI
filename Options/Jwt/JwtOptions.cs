@@ -1,8 +1,8 @@
 ﻿namespace CaseAPI.Options.Jwt;
 
-public class JwtOptions
+public sealed record JwtOptions
 {
-    public string? SecurityKey { get; set; }
-    public string? Issuer { get; set; }
-    public string? Audience { get; set; }
+    public string? SecurityKey { get; init; }
+    public string? Issuer { get; init; }
+    public string? Audience { get; init; }
 }

@@ -1,12 +1,15 @@
 ﻿using CaseAPI.Abstractions.Accounts;
+using CaseAPI.Abstractions.Users;
 using CaseAPI.Data;
 using CaseAPI.Entities;
+using CaseAPI.Exceptions.Accounts;
 using CaseAPI.Models.Accounts;
 using Microsoft.EntityFrameworkCore;
 
 namespace CaseAPI.Services.Accounts;
 
-public sealed class AccountService(ApplicationDbContext context) : IAccountService
+public sealed class AccountService(ApplicationDbContext context,
+    IUserService userService) : IAccountService
 {
     public async Task<Account> CreateAsync(CreateAccount model)
     {
@@ -15,13 +18,13 @@ public sealed class AccountService(ApplicationDbContext context) : IAccountServi
         bool anyResult = await context.Accounts.AnyAsync(x => x.Code == code);
 
         if (anyResult)
-            throw new Exception();
+            throw new AccountCodeNotUniqueException();
 
         Account account = new()
         {
             Id = Guid.NewGuid(),
             Code = code,
-            AppUserId = Guid.Parse(model.AppUserId),
+            AppUserId = userService.GetAuthenticatedUserId(),
             Title = model.Title,
             Balance = 0,
         };
@@ -30,6 +33,17 @@ public sealed class AccountService(ApplicationDbContext context) : IAccountServi
         await context.SaveChangesAsync();
 
         return account;
+    }
+
+    public async Task<List<ResultAccount>> GetAllAsync()
+    {
+        return await context.Accounts.AsNoTracking().Where(x => x.AppUserId == userService.GetAuthenticatedUserId()).Select(x => new ResultAccount
+        {
+            Id = x.Id,
+            Code = x.Code,
+            Title = x.Title,
+            Balance = x.Balance,
+        }).ToListAsync();
     }
 
     private async Task<string> CreateCodeAsync()

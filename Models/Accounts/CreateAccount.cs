@@ -1,7 +1,6 @@
 ﻿namespace CaseAPI.Models.Accounts;
 
-public sealed class CreateAccount
+public sealed record CreateAccount
 {
-    public string? AppUserId { get; set; }
-    public string? Title { get; set; }
+    public string? Title { get; init; }
 }

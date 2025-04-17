@@ -1,38 +1,20 @@
 ﻿using CaseAPI.Abstractions.Accounts;
-using CaseAPI.Data;
 using CaseAPI.Models.Accounts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CaseAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public sealed class AccountsController(
-    ApplicationDbContext context,
-    IAccountService accountService) : ControllerBase
+    IAccountService accountService,
+    IAccountTransactionService accountTransactionService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] string? appUserId = null)
-    {
-        var query = context.Accounts
-            .AsNoTrackingWithIdentityResolution();
-
-        if (!string.IsNullOrEmpty(appUserId))
-            query = query.Where(x => x.AppUserId == Guid.Parse(appUserId));
-
-        var result = await query
-            .Select(x => new
-            {
-                x.Title,
-                x.Balance,
-                x.AppUserId,
-                x.Id,
-                x.Code,
-            }).ToListAsync();
-
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetAll() => Ok(await accountService.GetAllAsync());
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateAccount model)
@@ -42,23 +24,5 @@ public sealed class AccountsController(
     }
 
     [HttpGet("{id}/transactions")]
-    public async Task<IActionResult> Transactions(string id)
-    {
-        var result = await context.AccountTransactions.Where(x => x.AccountId == Guid.Parse(id))
-            .AsNoTrackingWithIdentityResolution()
-            .Select(x => new
-            {
-                Channel = x.Channel.ToString(),
-                x.Balance,
-                x.UpdatedBalance,
-                x.CreatedDate,
-                x.Id,
-                x.AccountId,
-                x.Amount,
-                Type = x.Type.ToString(),
-                x.Description,
-            }).OrderByDescending(x => x.CreatedDate).ToListAsync();
-
-        return Ok(result);
-    }
+    public async Task<IActionResult> Transactions(string id) => Ok(await accountTransactionService.GetAllAsync(id));
 }

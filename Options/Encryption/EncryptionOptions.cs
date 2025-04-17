@@ -1,6 +1,6 @@
 ﻿namespace CaseAPI.Options.Encryption;
 
-public class EncryptionOptions
+public sealed record EncryptionOptions
 {
-    public string? SecretKey { get; set; }
+    public string? SecretKey { get; init; }
 }

@@ -119,20 +119,71 @@ using var scope = app.Services.CreateScope();
 
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
+var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
 if (!await userManager.Users.AnyAsync())
 {
-    await userManager.CreateAsync(new AppUser
+    string password = "1";
+
+    AppUser user1 = new AppUser
     {
-        UserName = "admin",
-        Email = "admin@gmail.com"
-    }, "1");
+        UserName = "user1",
+        Email = "user1@gmail.com"
+    };
+
+    AppUser user2 = new AppUser
+    {
+        UserName = "user2",
+        Email = "user2@gmail.com"
+    };
+
+    await userManager.CreateAsync(user1, password);
+
+    await userManager.CreateAsync(user2, password);
 
 
-    await userManager.CreateAsync(new AppUser
+    await applicationDbContext.Accounts.AddAsync(new Account
     {
-        UserName = "user",
-        Email = "user@gmail.com"
-    }, "1");
+        Code = "12345678",
+        AppUserId = user1.Id,
+        Title = "Account 1",
+        Balance = 1000
+    });
+
+    await applicationDbContext.Accounts.AddAsync(new Account
+    {
+        Code = "12345679",
+        AppUserId = user1.Id,
+        Title = "Account 2",
+        Balance = 3000
+    });
+
+
+    await applicationDbContext.Accounts.AddAsync(new Account
+    {
+        Code = "12345638",
+        AppUserId = user2.Id,
+        Title = "Account 1",
+        Balance = 1500
+    });
+
+    await applicationDbContext.Accounts.AddAsync(new Account
+    {
+        Code = "12345649",
+        AppUserId = user2.Id,
+        Title = "Account 2",
+        Balance = 3500
+    });
+
+    await applicationDbContext.Accounts.AddAsync(new Account
+    {
+        Code = "12345249",
+        AppUserId = user2.Id,
+        Title = "Account 3",
+        Balance = 5500
+    });
+
+    await applicationDbContext.SaveChangesAsync();
 }
 
 if (app.Environment.IsDevelopment())

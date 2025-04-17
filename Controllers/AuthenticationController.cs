@@ -17,25 +17,4 @@ public sealed class AuthenticationController(
         CreatedJwt jwt = await authenticationService.LoginAsync(model);
         return Ok(jwt);
     }
-
-    //[HttpPost("create-deposit")]
-    //public async Task<IActionResult> CreateDeposit(CreateDeposit model)
-    //{
-    //    await accountTransactionService.CreateDepositAsync(model);
-    //    return Ok();
-    //}
-
-    //[HttpPost("create-each-other-deposit")]
-    //public async Task<IActionResult> CreateEacherOtherDeposit(CreateEachOtherDeposit model)
-    //{
-    //    await accountTransactionService.CreateEachOtherDepositAsync(model);
-    //    return Ok();
-    //}
-
-    //[HttpPost("create-withdrawal")]
-    //public async Task<IActionResult> CreateWithdrawal(CreateWithdrawal model)
-    //{
-    //    await accountTransactionService.CreateWithdrawalAsync(model);
-    //    return Ok();
-    //}
 }

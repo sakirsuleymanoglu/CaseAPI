@@ -33,7 +33,7 @@ public sealed class ExceptionHandlerMiddleware(RequestDelegate next)
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(new
         {
-            ex.Message,
+            Message = context.Response.StatusCode == (int)HttpStatusCode.InternalServerError ? "Beklenmeyen bir hata meydana geldi" : ex.Message,
         }, new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

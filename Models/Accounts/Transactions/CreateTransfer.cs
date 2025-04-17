@@ -1,9 +1,9 @@
 ﻿namespace CaseAPI.Models.Accounts.Transactions;
 
-public class CreateTransfer
+public sealed record CreateTransfer
 {
-    public string? FromAccountCode { get; set; }
-    public string? ToAccountCode { get; set; }
-    public string? Channel { get; set; }
-    public decimal Amount { get; set; }
+    public string? FromAccountCode { get; init; }
+    public string? ToAccountCode { get; init; }
+    public string? Channel { get; init; }
+    public decimal Amount { get; init; }
 }
