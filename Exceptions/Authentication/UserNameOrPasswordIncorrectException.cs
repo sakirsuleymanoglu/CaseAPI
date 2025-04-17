@@ -1,8 +1,11 @@
-﻿namespace CaseAPI.Exceptions.Authentication;
+﻿using CaseAPI.Exceptions.Common;
 
-public class UserNameOrPasswordIncorrectException : Exception
+namespace CaseAPI.Exceptions.Authentication;
+
+public sealed class UserNameOrPasswordIncorrectException : BadRequestException
 {
     public UserNameOrPasswordIncorrectException() : base("Kullanıcı adı ya da parola hatalı")
     {
+
     }
 }

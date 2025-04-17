@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using CaseAPI.Exceptions.Common;
+using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 
@@ -20,13 +21,22 @@ public sealed class ExceptionHandlerMiddleware(RequestDelegate next)
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         context.Response.ContentType = MediaTypeNames.Application.Json;
+
+        context.Response.StatusCode = ex switch
+        {
+            BadRequestException => context.Response.StatusCode = (int)HttpStatusCode.BadRequest,
+            UnauthorizedAccessException => context.Response.StatusCode = (int)HttpStatusCode.Unauthorized,
+            NotFoundException => context.Response.StatusCode = (int)HttpStatusCode.NotFound,
+            _ => context.Response.StatusCode = (int)HttpStatusCode.InternalServerError
+        };
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(new
         {
-            StatusCode = context.Response.StatusCode,
-            Message = ex.Message,
+            ex.Message,
+        }, new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         }));
     }
 }

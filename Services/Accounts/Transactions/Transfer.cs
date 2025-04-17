@@ -1,34 +1,40 @@
 ﻿using CaseAPI.Abstractions.Accounts.Transactions;
 using CaseAPI.Abstractions.Hubs;
+using CaseAPI.Abstractions.Users;
 using CaseAPI.Data;
 using CaseAPI.Entities;
 using CaseAPI.Entities.Enums;
+using CaseAPI.Exceptions.Transactions;
 using CaseAPI.Models.Accounts.Transactions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CaseAPI.Services.Accounts.Transactions;
 
-public sealed class Transfer(CreateTransfer model, ApplicationDbContext context,
-     ITransferHubService transferHubService) : TransactionBase(model.Channel), ITransaction
+public sealed class Transfer(
+    CreateTransfer model,
+    ApplicationDbContext context,
+    ITransferHubService transferHubService,
+    IUserService userService) : TransactionBase(model.Channel), ITransaction
 {
     public TransactionType Type { get; } = TransactionType.Transfer;
 
     public async Task OperationAsync()
     {
+        Guid userId = userService.GetAuthenticatedUserId();
+
+        bool userHasFromAccount = await context.Accounts.AnyAsync(x => x.Code == model.FromAccountCode && x.AppUserId == userId);
+
+        if (!userHasFromAccount)
+            throw new UserHasFromAccountException();
+
         Account? fromAccount = await context.Accounts
             .Include(x => x.AppUser)
-            .SingleOrDefaultAsync(x => x.Code == model.FromAccountCode);
+            .SingleOrDefaultAsync(x => x.Code == model.FromAccountCode) ?? throw new AccountNotFoundException();
 
-        if (fromAccount == null)
-            throw new Exception();
-
-        Account? toAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Code == model.ToAccountCode);
-
-        if (toAccount == null)
-            throw new Exception();
+        Account? toAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Code == model.ToAccountCode) ?? throw new AccountNotFoundException();
 
         if (fromAccount.Balance < model.Amount)
-            throw new Exception("Insufficient balance");
+            throw new InsufficientBalanceException();
 
         decimal toAccountBalance = toAccount.Balance;
         decimal fromAccountBalance = fromAccount.Balance;

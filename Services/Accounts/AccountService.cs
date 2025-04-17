@@ -36,11 +36,9 @@ public sealed class AccountService(ApplicationDbContext context) : IAccountServi
     {
         Random random = new();
         string code;
-
         do
         {
             code = random.Next(10000000, 100000000).ToString();
-
         } while (await context.Accounts.AnyAsync(x => x.Code == code));
 
         return code;
