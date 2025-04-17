@@ -1,21 +1,25 @@
 using CaseAPI.Abstractions.Accounts;
 using CaseAPI.Abstractions.Authentication;
 using CaseAPI.Abstractions.Encryption;
+using CaseAPI.Abstractions.Hubs;
 using CaseAPI.Abstractions.Jwt;
 using CaseAPI.Abstractions.Users;
 using CaseAPI.Data;
 using CaseAPI.Entities;
+using CaseAPI.Hubs;
 using CaseAPI.Middlewares;
 using CaseAPI.Options.Encryption;
 using CaseAPI.Options.Jwt;
 using CaseAPI.Services.Accounts;
 using CaseAPI.Services.Authentication;
 using CaseAPI.Services.Encryption;
+using CaseAPI.Services.Hubs.Transfer;
 using CaseAPI.Services.Jwt;
 using CaseAPI.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -47,6 +51,8 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAccountTransactionService, AccountTransactionService>();
 
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<ITransferHubService, TransferHubService>();
 
 builder.Services.AddOpenApi();
 
@@ -90,6 +96,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey)),
         ClockSkew = TimeSpan.Zero
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Query.TryGetValue("access_token", out StringValues value))
+            {
+                context.Token = value;
+            }
+            return Task.CompletedTask;
+        }
+    };
+
 });
 
 var app = builder.Build();
@@ -129,5 +148,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<TransferHub>("/transfer-hub");
 
 app.Run();

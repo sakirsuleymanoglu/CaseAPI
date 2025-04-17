@@ -8,7 +8,7 @@ namespace CaseAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(
+public sealed class AccountsController(
     ApplicationDbContext context,
     IAccountService accountService) : ControllerBase
 {

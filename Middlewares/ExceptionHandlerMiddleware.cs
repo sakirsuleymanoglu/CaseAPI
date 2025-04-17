@@ -1,36 +1,29 @@
 ﻿using System.Net;
+using System.Net.Mime;
 using System.Text.Json;
 
 namespace CaseAPI.Middlewares;
 
-public class ExceptionHandlerMiddleware
+public sealed class ExceptionHandlerMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public ExceptionHandlerMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
-    public async Task InvokeAsync(HttpContext httpContext)
+    public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            // Pass the request to the next middleware
-            await _next(httpContext);
+            await next(context);
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(httpContext, ex);
+            await HandleExceptionAsync(context, ex);
         }
     }
 
-    private Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = MediaTypeNames.Application.Json;
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new
         {
             StatusCode = context.Response.StatusCode,
             Message = ex.Message,

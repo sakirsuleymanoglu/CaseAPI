@@ -3,10 +3,7 @@ using CaseAPI.Abstractions.Authentication;
 using CaseAPI.Models.Accounts.Transactions;
 using CaseAPI.Models.Authentication;
 using CaseAPI.Models.Jwt;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CaseAPI.Controllers;
 
@@ -21,18 +18,6 @@ public sealed class AuthenticationController(
     {
         CreatedJwt jwt = await authenticationService.LoginAsync(model);
         return Ok(jwt);
-    }
-
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [HttpGet("test-authorize")]
-    public IActionResult TestAuthorize()
-    {
-        return Ok(new
-        {
-            Message = "You are authorized to access this endpoint.",
-            UserName = User.Identity?.Name,
-            UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-        });
     }
 
     [HttpPost("create-deposit")]
