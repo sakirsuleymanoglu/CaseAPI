@@ -14,7 +14,7 @@ public sealed class AuthenticationService(
     IEncryptionService encryptionService,
     IJwtService jwtService) : IAuthenticationService
 {
-    private void LoginException() => throw new UserNameOrPasswordIncorrectException();
+    private static void LoginException() => throw new UserNameOrPasswordIncorrectException();
 
     public async Task<CreatedJwt> LoginAsync(Login model)
     {
