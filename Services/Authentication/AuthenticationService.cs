@@ -14,22 +14,36 @@ public sealed class AuthenticationService(
     IEncryptionService encryptionService,
     IJwtService jwtService) : IAuthenticationService
 {
-    private static void LoginException() => throw new UserNameOrPasswordIncorrectException();
-
     public async Task<CreatedJwt> LoginAsync(Login model)
     {
+        bool isValid = true;
+
         AppUser? user = await userManager.FindByNameAsync(model.UserName);
 
-        if (user == null) LoginException();
+        if (user == null)
+            isValid = false;
 
-        string? decryptedPassword = encryptionService.Decrypt(model.Password);
+        string? decryptedPassword = null;
 
-        if (decryptedPassword == null) LoginException();
+        if (isValid)
+        {
+            decryptedPassword = encryptionService.Decrypt(model.Password);
 
-        bool checkPasswordResult = await userManager.CheckPasswordAsync(user, decryptedPassword);
+            if (decryptedPassword == null)
+                isValid = false;
+        }
 
-        if (!checkPasswordResult) LoginException();
+        if (isValid)
+        {
+            bool checkPasswordResult = await userManager.CheckPasswordAsync(user!, decryptedPassword!);
 
-        return await jwtService.CreateAsync(user);
+            if (!checkPasswordResult)
+                isValid = false;
+        }
+
+        if (!isValid)
+            throw new UserNameOrPasswordIncorrectException();
+
+        return await jwtService.CreateAsync(user!);
     }
 }
