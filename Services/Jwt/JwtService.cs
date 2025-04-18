@@ -32,7 +32,7 @@ public sealed class JwtService(IOptions<JwtOptions> options,
             claims.Add(new Claim(ClaimTypes.Role, role));
 
         DateTime notBefore = DateTime.Now;
-        DateTime expires = notBefore.AddMinutes(30);
+        DateTime expires = notBefore.AddMinutes(options.Value.ExpireInMinutes);
 
         JwtSecurityToken token = new(
             issuer: options.Value.Issuer,
