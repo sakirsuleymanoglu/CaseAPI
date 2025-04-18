@@ -18,10 +18,12 @@ public sealed class AuthenticationService(
     {
         bool isValid = true;
 
+        void SetIsValidFalse() => isValid = false;
+
         AppUser? user = await userManager.FindByNameAsync(model.UserName);
 
         if (user == null)
-            isValid = false;
+            SetIsValidFalse();
 
         string? decryptedPassword = null;
 
@@ -30,7 +32,7 @@ public sealed class AuthenticationService(
             decryptedPassword = encryptionService.Decrypt(model.Password);
 
             if (decryptedPassword == null)
-                isValid = false;
+                SetIsValidFalse();
         }
 
         if (isValid)
@@ -38,7 +40,7 @@ public sealed class AuthenticationService(
             bool checkPasswordResult = await userManager.CheckPasswordAsync(user!, decryptedPassword!);
 
             if (!checkPasswordResult)
-                isValid = false;
+                SetIsValidFalse();
         }
 
         if (!isValid)
