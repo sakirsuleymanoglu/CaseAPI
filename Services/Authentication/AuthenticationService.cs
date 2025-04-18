@@ -16,36 +16,58 @@ public sealed class AuthenticationService(
 {
     public async Task<CreatedJwt> LoginAsync(Login model)
     {
-        bool isValid = true;
-
-        void SetIsValidFalse() => isValid = false;
-
         AppUser? user = await userManager.FindByNameAsync(model.UserName);
 
-        if (user == null)
-            SetIsValidFalse();
-
-        string? decryptedPassword = null;
-
-        if (isValid)
+        if (user != null)
         {
-            decryptedPassword = encryptionService.Decrypt(model.Password);
+            string? decryptedPassword = encryptionService.Decrypt(model.Password);
 
-            if (decryptedPassword == null)
-                SetIsValidFalse();
+            if (decryptedPassword != null)
+            {
+                bool checkPasswordResult = await userManager.CheckPasswordAsync(user!, decryptedPassword!);
+
+                if (checkPasswordResult)
+                {
+                    return await jwtService.CreateAsync(user!);
+                }
+            }
         }
 
-        if (isValid)
-        {
-            bool checkPasswordResult = await userManager.CheckPasswordAsync(user!, decryptedPassword!);
-
-            if (!checkPasswordResult)
-                SetIsValidFalse();
-        }
-
-        if (!isValid)
-            throw new UserNameOrPasswordIncorrectException();
-
-        return await jwtService.CreateAsync(user!);
+        throw new UserNameOrPasswordIncorrectException();
     }
+
+    //public async Task<CreatedJwt> LoginAsync(Login model)
+    //{
+    //    bool isValid = true;
+
+    //    void SetIsValidFalse() => isValid = false;
+
+    //    AppUser? user = await userManager.FindByNameAsync(model.UserName);
+
+    //    if (user == null)
+    //        SetIsValidFalse();
+
+    //    string? decryptedPassword = null;
+
+    //    if (isValid)
+    //    {
+    //        decryptedPassword = encryptionService.Decrypt(model.Password);
+
+    //        if (decryptedPassword == null)
+    //            SetIsValidFalse();
+    //    }
+
+    //    if (isValid)
+    //    {
+    //        bool checkPasswordResult = await userManager.CheckPasswordAsync(user!, decryptedPassword!);
+
+    //        if (!checkPasswordResult)
+    //            SetIsValidFalse();
+    //    }
+
+    //    if (!isValid)
+    //        throw new UserNameOrPasswordIncorrectException();
+
+    //    return await jwtService.CreateAsync(user!);
+    //}
 }
